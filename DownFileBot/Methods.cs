@@ -6,10 +6,8 @@ using System.Net.Http.Headers;
 using System.Text;
 abstract public class Methods
 {
-    private static string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.ini");
-    private static FileIniDataParser parser = new FileIniDataParser();
-    private static IniData? data = parser.ReadFile(path);
-    static async Task<string> DownFile(string url)
+   
+   public static async Task<string> DownFile(string url)
     {
 
         ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
@@ -20,9 +18,9 @@ abstract public class Methods
         using (HttpClient client = new HttpClient())
         {
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
-            if (url.Contains(":8090/"))
+            if (url.Contains(":8090/")&& BotTelegram.data.GetKey("YourSettingsTor")!=null)
             {
-                string authInfo = data["Profile0"]["YourSettingsTor"];    //строка для авторизации ,логин и пароль торрсерва чере":"
+                string authInfo = BotTelegram.data["Profile0"]["YourSettingsTor"];    //строка для авторизации ,логин и пароль торрсерва чере":"
                 authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));//авторизируемся
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authInfo);
             }
@@ -37,7 +35,7 @@ abstract public class Methods
                         int bytesRead;
                         long totalBytesRead = 0;
                         long totalBytes = response.Content.Headers.ContentLength ?? -1;
-                        if (totalBytes > 536870912000)
+                        if (totalBytes > 52428800) //проверка файла больше ли 50мб
                         {
                             return "";
                         }
@@ -71,6 +69,31 @@ abstract public class Methods
         }
         Console.WriteLine("\nФайл успешно скачан!");
         return fileName;
+    }
+
+    public static bool UrlIsValid(string url)
+    {
+        Uri uriResult;
+        bool result = Uri.TryCreate(url, UriKind.Absolute, out uriResult)
+            && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+
+        if (result)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "HEAD";
+            try
+            {
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                result = response.StatusCode == HttpStatusCode.OK;
+                response.Close();
+            }
+            catch
+            {
+                result = false;
+            }
+        }
+
+        return result;
     }
 }
 
