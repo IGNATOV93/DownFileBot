@@ -14,7 +14,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
     public abstract class BotTelegram
     {
-        private static string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tokens.ini");
+        private static string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.ini");
         private static FileIniDataParser parser = new FileIniDataParser();
         private static IniData? data = parser.ReadFile(path);
         static private TelegramBotClient client = new TelegramBotClient(data["Profile0"]["YourBotTelegreamToken"]);
