@@ -12,8 +12,6 @@ using System.Xml.Linq;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
-namespace DownlonadTorrents.Telegram
-{
     public abstract class BotTelegram
     {
         private static string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tokens.ini");
@@ -79,4 +77,3 @@ namespace DownlonadTorrents.Telegram
             Console.ReadLine();
         }
     }
-}

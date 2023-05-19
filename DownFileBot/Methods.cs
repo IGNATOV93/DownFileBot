@@ -2,16 +2,11 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
-
-namespace DownlonadTorrents
-{
-    abstract public class WorkingF
+    abstract public class Methods
     {
-        static async Task<string> DownFile(string urls)
+        static async Task<string> DownFile(string url)
         {
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-
-            string url = "http://176.124.217.215:8090/stream/%2001%20%D0%93%D0%B0%D0%BB%D1%83%D1%81%D1%82%D1%8F%D0%BD.%202022.WEBRip%201080p.Files-x.mkv?link=79697ee9ddd5e1f714e9cd54660b2beb1441856d&index=1&play";
             string fileName = Path.GetFileName(url);
             if (fileName.Contains('?')) { fileName = fileName.Split('?')[0]; }
             Console.WriteLine($"Идет загрузка файла: {fileName} ");
@@ -68,4 +63,4 @@ namespace DownlonadTorrents
             return fileName;
         }
     }
-}
+
