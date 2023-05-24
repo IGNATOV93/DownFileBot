@@ -6,14 +6,18 @@ using System.Reflection;
 using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
+using Telegram.Bot;
 using static System.Net.Mime.MediaTypeNames;
 
 public class MainClass
 {
-    //
-    static void Main()
+  
+    static async Task Main()
     {
-        BotTelegram.StatsBot();
+
+    
+         BotTelegram.StatsBot();
         Console.ReadLine();
     }
+   
 }

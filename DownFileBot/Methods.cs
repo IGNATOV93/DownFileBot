@@ -1,5 +1,6 @@
 ﻿using IniParser;
 using IniParser.Model;
+using Plugin.Media.Abstractions;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Headers;
@@ -9,7 +10,7 @@ abstract public class Methods
    
    public static async Task<string> DownFile(string url)
     {
-
+        
         ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
         string fileName = Path.GetFileName(url);
         if (fileName.Contains('?')) { fileName = fileName.Split('?')[0]; }
@@ -35,7 +36,7 @@ abstract public class Methods
                         int bytesRead;
                         long totalBytesRead = 0;
                         long totalBytes = response.Content.Headers.ContentLength ?? -1;
-                        if (totalBytes > 52428800) //проверка файла больше ли 50мб
+                        if (totalBytes >= 2000000000) //проверка файла больше ли 2000мб
                         {
                             return "";
                         }
@@ -70,7 +71,7 @@ abstract public class Methods
         Console.WriteLine("\nФайл успешно скачан!");
         return fileName;
     }
-
+    
     public static bool UrlIsValid(string url)
     {
         Uri uriResult;
