@@ -1,6 +1,5 @@
 ﻿using IniParser;
 using IniParser.Model;
-using Plugin.Media.Abstractions;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Headers;
@@ -8,7 +7,7 @@ using System.Text;
 abstract public class Methods
 {
    
-   public static async Task<string> DownFile(string url)
+   public static async Task<string> DownFile(string url,string idMessage)
     {
         
         ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
@@ -19,9 +18,9 @@ abstract public class Methods
         using (HttpClient client = new HttpClient())
         {
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
-            if (url.Contains(":8090/")&& BotTelegram.data.GetKey("YourSettingsTor")!=null)
+            if (url.Contains(":8090/")&& BotTelegram.data?.GetKey(idMessage) !=null)
             {
-                string authInfo = BotTelegram.data["Profile0"]["YourSettingsTor"];    //строка для авторизации ,логин и пароль торрсерва чере":"
+                string authInfo = BotTelegram.data["Profile0"][idMessage];    //строка для авторизации ,логин и пароль торрсерва чере":"
                 authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));//авторизируемся
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authInfo);
             }
@@ -32,7 +31,7 @@ abstract public class Methods
                 {
                     using (Stream streamToWriteTo = File.Open(fileName, FileMode.Create))
                     {
-                        byte[] buffer = new byte[8192];
+                        byte[] buffer = new byte[10485760];
                         int bytesRead;
                         long totalBytesRead = 0;
                         long totalBytes = response.Content.Headers.ContentLength ?? -1;
@@ -42,7 +41,7 @@ abstract public class Methods
                         }
                         Stopwatch stopwatch = new Stopwatch();
                         stopwatch.Start();
-
+                        int countDisconnect =0;
                         while ((bytesRead = await streamToReadFrom.ReadAsync(buffer, 0, buffer.Length)) > 0)
                         {
                             try
@@ -51,24 +50,35 @@ abstract public class Methods
                             }
                             catch (Exception ex)
                             {
+                                if (countDisconnect > 10) { return ""; }//10 попыток докачать файл при ошибке
+                                countDisconnect++;
                                 Console.WriteLine(ex.Message);
                                 continue;
                             }
                             totalBytesRead += bytesRead;
-                            if (totalBytes > 0)
+                            if(totalBytes > 0)
                             {
                                 double percentage = Math.Round(((double)totalBytesRead / totalBytes) * 100, 1);
                                 double megabytesDownloaded = totalBytesRead / (1024 * 1024);
                                 double megabytesRemaining = (totalBytes - totalBytesRead) / (1024 * 1024);
+                                double speed =Math.Round(megabytesDownloaded/stopwatch.Elapsed.TotalSeconds,1);
+                                BotTelegram.DownfileIfo = $"\rЗагрузка:{megabytesDownloaded:F2} MB /{totalBytes / (1024 * 1024)} MB ({percentage}%) - завершится через: {TimeSpan.FromSeconds(stopwatch.Elapsed.TotalSeconds / totalBytesRead * (totalBytes - totalBytesRead)):hh\\:mm\\:ss}    скорость: {speed} Mb/s  ";
+                                Console.Write(BotTelegram.DownfileIfo);
 
-                                Console.Write($"\rИдет загрузка файла :{megabytesDownloaded:F2} MB /{totalBytes / (1024 * 1024)} MB ({percentage}%) - скачается через: {TimeSpan.FromSeconds(stopwatch.Elapsed.TotalSeconds / totalBytesRead * (totalBytes - totalBytesRead)):hh\\:mm\\:ss}    скорость: {Math.Round((bytesRead / 1024) / stopwatch.Elapsed.TotalSeconds, 2)} Mb/s  ");
                             }
                         }
+                        stopwatch.Stop();
+
+                        double totalSecondsAll = stopwatch.Elapsed.TotalSeconds;
+                        double megabytesDownloadedAll = new FileInfo(fileName).Length / (1024 * 1024);
+                        double speedAll = Math.Round(megabytesDownloadedAll / totalSecondsAll, 1);
+
+                        Console.WriteLine($"Загрузка завершена за {totalSecondsAll:F2} секунд. Средняя скорость загрузки: {speedAll:F2} МБ/с.");
                     }
                 }
             }
         }
-        Console.WriteLine("\nФайл успешно скачан!");
+        Console.WriteLine("\nФайл загружен на vps сервер");
         return fileName;
     }
     

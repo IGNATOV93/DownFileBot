@@ -1,6 +1,7 @@
 ﻿using IniParser;
 using IniParser.Model;
 using System.Net;
+using System.Reflection.Metadata;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.InputFiles;
@@ -16,71 +17,75 @@ public abstract class BotTelegram
     public static string? IdChats;
     public static int IdMessages;
     public static string PathDownFile = "";
-    public static Dictionary<string, int> DSettingsWievFiles = new();
+    public static string DownfileIfo = "";
 
 
 public static async Task Update(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
+        var buttonAuthTorrserver = new KeyboardButton("Настройка torrserver");
+        var keyButtonMain = new ReplyKeyboardMarkup(buttonAuthTorrserver); keyButtonMain.ResizeKeyboard = true;
+        var KeyboarDeleteMessage = new InlineKeyboardMarkup(new[]
+            {
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData("Скрыть сообщение \U0001F5D1", "deletemessages")
+                    }
+                });
         try
         {
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
             var message = update.Message;
-            var buttontopViewFiles = new KeyboardButton("Настройка отображения файлов");
-            var keyboardSettingsViewFiles = new ReplyKeyboardMarkup(new[] { buttontopViewFiles }); keyboardSettingsViewFiles.ResizeKeyboard = true;
-            var inlineKeyboardOptionViewFiles = new InlineKeyboardMarkup(new[]
-                   {
-                new[]
-                  {
-                    InlineKeyboardButton.WithCallbackData("Как видеофайлы",
-                        "setMovies"),
-                    InlineKeyboardButton.WithCallbackData("Как документы","setDocuments")
-
-                  },
-               });
+            
 
             if (message?.Text != null)
             {
                 IdChats = message?.Chat?.Id.ToString();
                 IdMessages = message.MessageId;
-                if (message.Text == "/start") { }
-                if (message.Text == "Настройка отображения файлов")
+           
+                if (message.Text == "/start") {
+                    await botClient.DeleteMessageAsync(IdChats, IdMessages);
+                    await botClient.SendTextMessageAsync(IdChats, "Привет,пришли мне ссылку на файл который хотите скачать \r\n а я его скачаю (до 1.85 гб размером)", replyMarkup: keyButtonMain);
+                    return;
+                }
+                if (message.Text == "Настройка torrserver")
                 {
                     await botClient.DeleteMessageAsync(IdChats, IdMessages);
-                    await botClient.SendTextMessageAsync(IdChats, "Выберите как отображать файлы", replyMarkup: inlineKeyboardOptionViewFiles);
+                    await botClient.SendTextMessageAsync(IdChats, "Для настройки авторизации torrserver,напишите в чате логин пароль через \"&&&\"\r\n" +
+                        "пример : ivanov&&&1933abcd", replyMarkup: keyButtonMain);
+                    return;
+                }
+                if(message.Text.Contains("&&&"))
+                {
+                    var authTorArray = message.Text.Split("&&&");
+                    string authString = authTorArray[0]+":"+authTorArray[1];
+                    data["Profile0"][IdChats] = authString;
+                    parser.ReadFile(path);
+                    parser.WriteFile("settings.ini", data);
+                    await botClient.DeleteMessageAsync(IdChats, IdMessages);
+                    await botClient.SendTextMessageAsync(IdChats, "Хорошо,авторизация сохранена", replyMarkup: KeyboarDeleteMessage);
                     return;
                 }
                 if (Methods.UrlIsValid(message.Text.ToString()))
                 {
-                    
-                    PathDownFile = await Methods.DownFile(message.Text.ToString());
+                    var messageDounFile = await botClient.SendTextMessageAsync(IdChats, "Файл загружается ...", replyMarkup: keyButtonMain);
+                   string PathDownFile = await Methods.DownFile(message.Text.ToString(),IdChats);
                     if (PathDownFile != "")
                     {
-                        var messageDounFile = await botClient.SendTextMessageAsync(IdChats, "Файл загружается ...", replyMarkup: keyboardSettingsViewFiles);
                         var stream = new FileStream(PathDownFile, FileMode.Open);
                         InputOnlineFile file = new InputOnlineFile(stream, PathDownFile);
                         await botClient.DeleteMessageAsync(IdChats, IdMessages);
-                       
-                        if (DSettingsWievFiles.ContainsKey(IdChats))
-                        {
-                          
-                            if (DSettingsWievFiles[IdChats] == 1)
-                            {
-                                await botClient.SendVideoAsync(IdChats, file, replyMarkup: keyboardSettingsViewFiles);
-                            }
-                            if (DSettingsWievFiles[IdChats] == 2)
-                            {
-                                await botClient.SendDocumentAsync(IdChats, file, replyMarkup: keyboardSettingsViewFiles);
-                            }
-
-                        }
-
+                        await botClient.SendDocumentAsync(IdChats, file, replyMarkup: keyButtonMain);
+                        Console.WriteLine("Файл загружен в телеграм сервер");
+                        await botClient.DeleteMessageAsync(messageDounFile.Chat.Id, messageDounFile.MessageId);
                         System.IO.File.Delete(PathDownFile);
                         return;
                     }
-                    await botClient.SendTextMessageAsync(IdChats, "Это печально но файл больше 2гб или неверная ссылка");
+                    await botClient.DeleteMessageAsync(IdChats, IdMessages);
+                    await botClient.SendTextMessageAsync(IdChats, "Это печально но файл больше 1.85 гб или неверная ссылка", replyMarkup: KeyboarDeleteMessage);
                     return;
                 }
-                await botClient.SendTextMessageAsync(IdChats, "Ссылка на файл не корректная");
+                await botClient.DeleteMessageAsync(IdChats, IdMessages);
+                await botClient.SendTextMessageAsync(IdChats, "Ссылка на файл не корректная", replyMarkup:KeyboarDeleteMessage);
                 return;
             }
             if (update?.CallbackQuery?.Data != null) //ОБРАБОТКА UPDATE (inline)
@@ -88,26 +93,17 @@ public static async Task Update(ITelegramBotClient botClient, Update update, Can
                 string textInline = update.CallbackQuery.Data.ToString();
                 IdChats = update.CallbackQuery.Message.Chat.Id.ToString();
                 IdMessages = Int32.Parse(update.CallbackQuery.Message.MessageId.ToString());
-                if (textInline == "setMovies")
+                if(textInline== "deletemessages")
                 {
-                    if (!DSettingsWievFiles.ContainsKey(IdChats)) { DSettingsWievFiles.Add(IdChats, 1); }
-                    if (DSettingsWievFiles.ContainsKey(IdChats)) { DSettingsWievFiles[IdChats] = 1; }
-                    await botClient.SendTextMessageAsync(IdChats, "Сохранил ваш выбор");
+                    await botClient.DeleteMessageAsync(IdChats, IdMessages);
                     return;
-                }
-                if (textInline == "setDocuments")
-                {
-                    if (!DSettingsWievFiles.ContainsKey(IdChats)) { DSettingsWievFiles.Add(IdChats, 2); }
-                    if (DSettingsWievFiles.ContainsKey(IdChats)) { DSettingsWievFiles[IdChats] = 2; }
-                    await botClient.SendTextMessageAsync(IdChats, "Сохранил ваш выбор");
-                    return;
-                }
+                }    
             }
         }
         catch(Exception e)
         {
             Console.WriteLine(e.ToString());
-            await botClient.SendTextMessageAsync(update.Message.Chat.Id, "Что то пошло не так..");
+            await botClient.SendTextMessageAsync(update.Message.Chat.Id, "Что то пошло не так..",replyMarkup:KeyboarDeleteMessage);
            
         }
     }
