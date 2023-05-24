@@ -31,7 +31,7 @@ abstract public class Methods
                 {
                     using (Stream streamToWriteTo = File.Open(fileName, FileMode.Create))
                     {
-                        byte[] buffer = new byte[10485760];
+                        byte[] buffer = new byte[10485760];//1082 было в стандарте .Теперь под файл 2гб ,вроде более менее
                         int bytesRead;
                         long totalBytesRead = 0;
                         long totalBytes = response.Content.Headers.ContentLength ?? -1;
