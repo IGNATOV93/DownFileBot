@@ -75,7 +75,7 @@ public static async Task Update(ITelegramBotClient botClient, Update update, Can
                         var stream = new FileStream(PathDownFile, FileMode.Open);
                         InputOnlineFile file = new InputOnlineFile(stream, PathDownFile);
                         await botClient.SendDocumentAsync(IdChats, file, replyMarkup: keyButtonMain);
-                        await botClient.DeleteMessageAsync(IdChats, IdMessages);
+                        await botClient.DeleteMessageAsync(IdChats, messageDounFile.MessageId);
                         Console.WriteLine("Файл загружен в телеграм сервер");
                         await botClient.DeleteMessageAsync(messageDounFile.Chat.Id, messageDounFile.MessageId);
                         System.IO.File.Delete(PathDownFile);
