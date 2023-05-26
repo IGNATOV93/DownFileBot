@@ -68,17 +68,17 @@ public static async Task Update(ITelegramBotClient botClient, Update update, Can
                 if (Methods.UrlIsValid(message.Text.ToString()))
                 {
 
-                    var messageDounFile = botClient.SendTextMessageAsync(IdChats, "Файл загружается ...", replyMarkup: keyButtonMain);
+                    var messageDounFile =await botClient.SendTextMessageAsync(IdChats, "Файл загружается ...", replyMarkup: keyButtonMain);
                     Task<string> t1 = Methods.DownFile(message.Text.ToString(), IdChats);
 
-                    Task t2 = SendTextMessageInLoopAsync(IdChats, DownfileIfo);
+                    Task t2 = SendTextMessageInLoopAsync();
                     await Task.WhenAll(t1, t2); // Выполняем задачи параллельно и ждем результат их завершения
-                    async Task SendTextMessageInLoopAsync(ChatId chatId, string message)
+                    async Task SendTextMessageInLoopAsync()
                     {
                         while (!t1.IsCompleted) // Цикл будет выполняться, пока задача t1 не завершится
                         {
-                            await Task.Delay(TimeSpan.FromSeconds(1)); // Задержка на 1 секунду
-                            await botClient.SendTextMessageAsync(chatId, DownfileIfo); // Отправляем текстовое сообщение
+                            await Task.Delay(TimeSpan.FromSeconds(2)); // Задержка на 1 секунду
+                            await botClient.SendTextMessageAsync(IdChats,DownfileIfo); // Отправляем текстовое сообщение
                             
                         }
                     }
@@ -88,10 +88,10 @@ public static async Task Update(ITelegramBotClient botClient, Update update, Can
                     {
                         var stream = new FileStream(PathDownFile, FileMode.Open);
                         InputOnlineFile file = new InputOnlineFile(stream, PathDownFile);
+                        await botClient.SendTextMessageAsync(IdChats, "Зазрузка в телеграм..");
 
-                        
 
-                       await botClient.SendDocumentAsync(IdChats, file, replyMarkup: keyButtonMain);
+                        await botClient.SendDocumentAsync(IdChats, file, replyMarkup: keyButtonMain);
                          // Создаем асинхронный метод для отправки текстовых сообщений
 
                         
