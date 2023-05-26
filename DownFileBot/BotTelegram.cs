@@ -77,19 +77,43 @@ public static async Task Update(ITelegramBotClient botClient, Update update, Can
                     {
                         while (!t1.IsCompleted) // Цикл будет выполняться, пока задача t1 не завершится
                         {
-                            await Task.Delay(TimeSpan.FromSeconds(2)); // Задержка на 1 секунду
+                            await Task.Delay(TimeSpan.FromSeconds(3)); // Задержка на  секунду
                             await botClient.EditMessageTextAsync(IdChats,messageDownFile.MessageId,DownfileIfo); // Отправляем текстовое сообщение
                             
                         }
                     }
                     PathDownFile = t1.Result;
+                    await botClient.DeleteMessageAsync(IdChats, IdMessages);
+                    await botClient.DeleteMessageAsync(IdChats, messageDownFile.MessageId);
                     if (PathDownFile != "")
                     {
                         var stream = new FileStream(PathDownFile, FileMode.Open);
                         InputOnlineFile file = new InputOnlineFile(stream, PathDownFile);
                      var messageDounwFileTelegram=await botClient.SendTextMessageAsync(IdChats, "Зазрузка в телеграм..");
 
-                        await botClient.SendDocumentAsync(IdChats, file, replyMarkup: keyButtonMain);
+                       var downFileTelegram=await botClient.SendDocumentAsync(IdChats, file, replyMarkup: keyButtonMain);
+                        string fileId = downFileTelegram.Document.FileId;
+                        long bytesUploaded = 0;
+                        var fileInfo = new FileInfo(PathDownFile);
+                        long fileSize = fileInfo.Length;
+                        DateTime startTime = DateTime.Now;
+                        while (bytesUploaded < fileSize)
+                        {
+                            // Отслеживать статус загрузки файла
+                            var File = await botClient.GetFileAsync(fileId);
+                            bytesUploaded = (long)File.FileSize;
+                            TimeSpan elapsed = DateTime.Now - startTime;
+                            double speedInBytesPerSecond = bytesUploaded / elapsed.TotalSeconds;
+                            double speedInMegabytesPerSecond = speedInBytesPerSecond / (1024 * 1024);
+
+                            Console.WriteLine("{0} MB / {1} MB - Speed: {2:0.00} MB/s", bytesUploaded / (1024 * 1024), fileSize / (1024 * 1024), speedInMegabytesPerSecond);
+
+                            // Задержка перед следующей проверкой статуса загрузки
+                            await Task.Delay(1000);
+                        }
+
+                        Console.WriteLine("Upload complete!");
+
                         Console.WriteLine("Файл загружен в телеграм сервер");
                         System.IO.File.Delete(PathDownFile);
                         return;
