@@ -68,7 +68,7 @@ public static async Task Update(ITelegramBotClient botClient, Update update, Can
                 if (Methods.UrlIsValid(message.Text.ToString()))
                 {
 
-                    var messageDounFile =await botClient.SendTextMessageAsync(IdChats, "Файл загружается ...", replyMarkup: keyButtonMain);
+                    var messageDounFile =await botClient.SendTextMessageAsync(IdChats, "Файл загружается ...");
                     Task<string> t1 = Methods.DownFile(message.Text.ToString(), IdChats);
 
                     Task t2 = SendTextMessageInLoopAsync();
@@ -78,7 +78,7 @@ public static async Task Update(ITelegramBotClient botClient, Update update, Can
                         while (!t1.IsCompleted) // Цикл будет выполняться, пока задача t1 не завершится
                         {
                             await Task.Delay(TimeSpan.FromSeconds(2)); // Задержка на 1 секунду
-                            await botClient.SendTextMessageAsync(IdChats,DownfileIfo); // Отправляем текстовое сообщение
+                            await botClient.EditMessageTextAsync(IdChats,messageDounFile.MessageId,DownfileIfo); // Отправляем текстовое сообщение
                             
                         }
                     }
