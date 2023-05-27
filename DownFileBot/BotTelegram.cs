@@ -123,7 +123,7 @@ public abstract class BotTelegram
         {
             Console.WriteLine(e.ToString());
             await botClient.SendTextMessageAsync(update.Message.Chat.Id, "Что то пошло не так..", replyMarkup: KeyboarDeleteMessage);
-
+            return;
         }
     }
     public static Task Error(ITelegramBotClient arg1, Exception arg2, CancellationToken arg3)
