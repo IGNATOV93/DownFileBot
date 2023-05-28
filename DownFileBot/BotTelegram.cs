@@ -11,14 +11,17 @@ public abstract class BotTelegram
     private static string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.ini");
     private static FileIniDataParser parser = new FileIniDataParser();
     public static IniData? data = parser.ReadFile(path);
+    private static HttpClient httpClient = new HttpClient
+    {
+        Timeout = TimeSpan.FromSeconds(300)
+    };
     static private TelegramBotClient client = new TelegramBotClient(new TelegramBotClientOptions(
-           data["Profile0"]["YourBotTelegreamToken"], data["Profile0"]["YourLocalServerTelegram"]));
+           data["Profile0"]["YourBotTelegreamToken"], data["Profile0"]["YourLocalServerTelegram"]),httpClient);
     public static string? IdChats;
     public static int IdMessages;
     public static string PathDownFile = "";
     public static string DownfileIfo = "";
-
-
+   
     public static async Task Update(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
         var buttonAuthTorrserver = new KeyboardButton("Настройка torrserver");
@@ -88,13 +91,16 @@ public abstract class BotTelegram
                     await botClient.DeleteMessageAsync(IdChats, messageDownFile.MessageId);
                     if (PathDownFile != "")
                     {
+                     
                         var stream = new FileStream(PathDownFile, FileMode.Open);
                         InputOnlineFile file = new InputOnlineFile(stream, PathDownFile);
-                        var messageDounwFileTelegram = await botClient.SendTextMessageAsync(IdChats, "Зазрузка в телеграм..");
+                        var sizeFileInBytes = new FileInfo(PathDownFile).Length;
+                        var sizeFileInMb = Math.Round(((double)sizeFileInBytes / 1048576)/9/60,1);
+                        var messageDounwFileTelegram = await botClient.SendTextMessageAsync(IdChats, $"Зазрузка в телеграм,займет примерно: {sizeFileInMb}  мин. ");
 
-                        var downFileTelegram = await botClient.SendDocumentAsync(IdChats, file, replyMarkup: keyButtonMain);
+                        var downFileTelegram = await botClient.SendDocumentAsync(IdChats, file,replyMarkup:keyButtonMain);
 
-
+                        await botClient.DeleteMessageAsync(IdChats, messageDounwFileTelegram.MessageId);
                         Console.WriteLine("Файл загружен в телеграм сервер");
                         System.IO.File.Delete(PathDownFile);
                         return;
