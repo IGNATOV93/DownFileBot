@@ -1,11 +1,11 @@
 ﻿using IniParser;
 using IniParser.Model;
+using Lime.Protocol.Util;
 using System.Net;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
-
 public abstract class BotTelegram
 {
     private static string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.ini");
@@ -101,12 +101,40 @@ public abstract class BotTelegram
                         var sizeFileInMb = Math.Round(((double)sizeFileInBytes / 1048576) / 9 / 60, 1);
                         var messageDounwFileTelegram = await botClient.SendTextMessageAsync(IdChats, $"Зазрузка в телеграм,займет примерно: {sizeFileInMb}  мин. ");
 
-                       var sendTask = Task.Run(async () => await botClient.SendDocumentAsync(IdChats, file));
+                       var sendTask = await botClient.SendDocumentAsync(IdChats, file);
+
+
+                        // Задаем скорость ограничения в байтах в секунду
+                        const int limit = 1024;
+
+                        var rateGate = new RateGate(limit, TimeSpan.FromSeconds(1));
                         
+                        // Создаем буфер для чтения данных из потока
+                        var buffer = new byte[4096];
+
+                        while (true)
+                        {
+                            // Получаем количество байт, доступных для чтения из потока
+                            var available = await stream.ReadAsync(buffer, 0, buffer.Length);
+
+                            if (available == 0)
+                                break;
+
+                            // Ограничиваем скорость отправки данных в потоке
+                            await rateGate.WaitAsync(available);
+
+                            // Отправляем доступные данные в поток
+                            await botClient.SendDocumentAsync(chatId, new InputOnlineFile(new MemoryStream(buffer, 0, available), "filename"));
+                        }
+
+
                         await botClient.DeleteMessageAsync(IdChats, messageDounwFileTelegram.MessageId);
                         Console.WriteLine("Файл загружен в телеграм сервер");
                         System.IO.File.Delete(PathDownFile);
+                        PathDownFile = "";
+                        DownfileIfo = "";
                         return;
+                        
                     }
                     await botClient.DeleteMessageAsync(IdChats, IdMessages);
                     await botClient.SendTextMessageAsync(IdChats, "Это печально но файл больше 1.85 гб или неверная ссылка", replyMarkup: KeyboarDeleteMessage);
