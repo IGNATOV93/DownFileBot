@@ -62,7 +62,7 @@ abstract public class Methods
                                 double megabytesDownloaded = totalBytesRead / (1024 * 1024);
                                 double megabytesRemaining = (totalBytes - totalBytesRead) / (1024 * 1024);
                                 double speed =Math.Round(megabytesDownloaded/stopwatch.Elapsed.TotalSeconds,1);
-                                BotTelegram.DownfileIfo = $"Загрузка на vps:{megabytesDownloaded:F2} MB /{totalBytes / (1024 * 1024)} MB ({percentage}%) - завершится через: {TimeSpan.FromSeconds(stopwatch.Elapsed.TotalSeconds / totalBytesRead * (totalBytes - totalBytesRead)):hh\\:mm\\:ss} : {speed} Mb/s  ";
+                                BotTelegram.DownfileIfo = $"\rЗагрузка на vps:{megabytesDownloaded:F2} MB /{totalBytes / (1024 * 1024)} MB ({percentage}%) - завершится через: {TimeSpan.FromSeconds(stopwatch.Elapsed.TotalSeconds / totalBytesRead * (totalBytes - totalBytesRead)):hh\\:mm\\:ss} : {speed} Mb/s  ";
                                 Console.Write("\r"+BotTelegram.DownfileIfo);
 
                             }
