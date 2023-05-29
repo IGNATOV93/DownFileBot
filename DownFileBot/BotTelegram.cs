@@ -120,16 +120,18 @@ public abstract class BotTelegram
                                 var sizeFileInMb = Math.Round(((double)sizeFileInBytes / 1048576) / 9 / 60, 1);
                                 var messageDounwFileTelegram = await botClient.SendTextMessageAsync(IdChats, $"Загрузка в телеграм займет примерно: {sizeFileInMb} мин.");
                                 idsendMes = messageDounwFileTelegram.MessageId;
-                                var bytesSent = 0L;
-                                stopwatch.Start();
-                                var timer = new Timer(_ =>
-                                {
-                                    bytesSent = stream.Position;
-                                    var elapsedSecs = stopwatch.ElapsedMilliseconds / 1000.0;
-                                    var speed = bytesSent / elapsedSecs / (1024 * 1024.0);
+                                long bytesSent = 0L; 
+                 
+                                stopwatch.Start(); 
+             
+                                Timer timer = new Timer(state => {
+                                    bytesSent = stream.Position; double elapsedSecs = stopwatch.ElapsedMilliseconds / 1000.0; double speed = 0.0; if (elapsedSecs != 0) { speed = bytesSent / elapsedSecs / (1024 * 1024.0); }
 
-                                    Console.Write($"\rSpeed: {speed:F2} MB/s,{bytesSent / (1024 * 1024.0):F2} MB / {stream.Length / (1024 * 1024.0):F2} MB");
-                                }, null, timerInterval, timerInterval);
+                                    double sizeNowFile = Math.Round(bytesSent / (1024 * 1024.0), 2);
+                                    double allSizeFile = Math.Round(stream.Length / (1024 * 1024.0), 2);
+
+                                    Console.Write($"\rSpeed: {speed:F2} MB/s,{sizeNowFile:F2} MB / {allSizeFile:F2} MB");
+                                }, null, 0, (int)timerInterval);
 
                                 using (var formData = new MultipartFormDataContent())
                                 {
