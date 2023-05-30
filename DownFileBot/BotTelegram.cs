@@ -120,28 +120,39 @@ public abstract class BotTelegram
                                 var sizeFileInMb = Math.Round(((double)sizeFileInBytes / 1048576) / 9 / 60, 1);
                                 var messageDounwFileTelegram = await botClient.SendTextMessageAsync(IdChats, $"Загрузка в телеграм займет примерно: {sizeFileInMb} мин.");
                                 idsendMes = messageDounwFileTelegram.MessageId;
-                                long bytesSent = 0L; 
+
+
+                                long bytesSent = 0L;
+                                double speed = 0.0;
+                                double sizeNowFile = 0.0;
+                                double allSizeFile = 0.0;
+                                double progress = 0.0;
+                                long bytesLeft = 0L;
+                                double timeLeft = 0.0;
+
                                 stopwatch.Start();
-                                Timer timer = new Timer(state => {
-                                bytesSent = stream.Position; double elapsedSecs = stopwatch.ElapsedMilliseconds / 1000.0; double speed = 0.0; if (elapsedSecs != 0) { speed = bytesSent / elapsedSecs / (1024 * 1024.0); }
-
-                                double sizeNowFile = Math.Round(bytesSent / (1024 * 1024.0), 2);
-                                double allSizeFile = Math.Round(stream.Length / (1024 * 1024.0), 2);
-                                double progress = Math.Round((double)bytesSent / stream.Length * 100, 2);
-                                long bytesLeft = stream.Length - stream.Position;
-                                // определяем сколько секунд потребуется на загрузку оставшихся байт
-                                double timeLeft = Math.Round(bytesLeft / speed, 1) * 60;
-                                string inputInfoToSendTelegram =$"\rЗагрузка в телеграм :{sizeNowFile}/{allSizeFile} MB ({progress})%  {speed:F2} MB/s ";
-                                    Console.Write(inputInfoToSendTelegram);
-                                    botClient.EditMessageTextAsync(IdChats, messageDounwFileTelegram.MessageId, inputInfoToSendTelegram);
-
-                                  
-                                }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(timerInterval));
 
                                 using (var formData = new MultipartFormDataContent())
                                 {
                                     formData.Add(new StringContent(IdChats), "chat_id");
                                     formData.Add(content, "document");
+
+                                    Timer timer = new Timer(state =>
+                                    {
+                                        bytesSent = stream.Position;
+                                        double elapsedSecs = stopwatch.ElapsedMilliseconds / 1000.0;
+                                        if (elapsedSecs != 0) speed = bytesSent / elapsedSecs / (1024 * 1024.0);
+
+                                        sizeNowFile = Math.Round(bytesSent / (1024 * 1024.0), 2);
+                                        allSizeFile = Math.Round(stream.Length / (1024 * 1024.0), 2);
+                                        progress = Math.Round((double)bytesSent / stream.Length * 100, 2);
+                                        bytesLeft = stream.Length - stream.Position;
+                                        timeLeft = Math.Round(bytesLeft / speed, 1) * 60;
+                                        string inputInfoToSendTelegram = $"\rЗагрузка в телеграм: {sizeNowFile}/{allSizeFile} MB ({progress}%) {speed:F2} MB/s Time Left: {timeLeft:F2} sec";
+
+                                        Console.Write(inputInfoToSendTelegram);
+                                        botClient.EditMessageTextAsync(IdChats, messageDounwFileTelegram.MessageId, inputInfoToSendTelegram);
+                                    }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(timerInterval));
 
                                     var response = await httpClient.SendAsync(new HttpRequestMessage
                                     {
@@ -152,27 +163,29 @@ public abstract class BotTelegram
 
                                     timer.Dispose();
                                     stopwatch.Stop();
+                                    bytesSent = stream.Length;
+
                                     var result = await response.Content.ReadAsStringAsync();
                                     Console.WriteLine(result);
                                 }
+
+                                // var sendTask = await botClient.SendDocumentAsync(IdChats, file);
+
+
+
+
+
+
+
+
+
+                                await botClient.DeleteMessageAsync(IdChats, idsendMes);
+                                Console.WriteLine("Файл загружен в телеграм сервер");
+                                System.IO.File.Delete(PathDownFile);
+                                PathDownFile = "";
+                                DownfileIfo = "";
+                                return;
                             }
-
-                            // var sendTask = await botClient.SendDocumentAsync(IdChats, file);
-
-
-
-
-
-
-
-
-
-                            await botClient.DeleteMessageAsync(IdChats, idsendMes);
-                            Console.WriteLine("Файл загружен в телеграм сервер");
-                            System.IO.File.Delete(PathDownFile);
-                            PathDownFile = "";
-                            DownfileIfo = "";
-                            return;
                         }
                         catch (Exception e)
                         {
