@@ -85,7 +85,7 @@ public abstract class BotTelegram
                         await Task.Delay(1000);
                         while (!t1.IsCompleted) // Цикл будет выполняться, пока задача t1 не завершится
                         {
-                            await Task.Delay(TimeSpan.FromSeconds(2)); // Задержка на  секунду
+                            await Task.Delay(TimeSpan.FromSeconds(1)); // Задержка на  секунду
                             await botClient.EditMessageTextAsync(IdChats, messageDownFile.MessageId, DownfileIfo); // Отправляем текстовое сообщение
 
                         }
@@ -153,7 +153,7 @@ public abstract class BotTelegram
 
                                         string timeLeftStr = (timeLeft.TotalSeconds < 60) ? $"{timeLeft.TotalSeconds:F0} sec." : $"{timeLeft.TotalMinutes:F0}:{timeLeft.Seconds:D2} min.";
 
-                                        string inputInfoToSendTelegram = $"\rЗагрузка в телеграм: {sizeNowFile}/{allSizeFile} MB ({progress}%) {speed:F2} MB/s Осталось примерно: {timeLeftStr}.";
+                                        string inputInfoToSendTelegram = $"\rЗагрузка в телеграм: {sizeNowFile}/{allSizeFile} MB \r({progress}%) \r{speed:F2} MB/s \rОсталось примерно: {timeLeftStr}.";
                                         if (progress >= 90.0)
                                         {
                                             inputInfoToSendTelegram = $"\rЗагрузка в телеграм: осталось несколько секунд..";
