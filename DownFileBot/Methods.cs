@@ -106,5 +106,37 @@ abstract public class Methods
 
         return result;
     }
+    public static  bool FileToVideoIsValid (string filePath)
+    {
+        string fileExtension = filePath.Split('.')[filePath.Split('.').Length - 1];
+        Console.WriteLine(filePath);
+        if (fileExtension == "mp4" ||
+            fileExtension == "avi" ||
+            fileExtension == "mov" ||
+            fileExtension == "wmv" ||
+            fileExtension == "flv" ||
+            fileExtension == "mkv")
+        {
+            Console.WriteLine("Файл является видео-файлом.");
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("Файл не является видео-файлом.");
+            return false;
+        }
+    }
+
+    public static string VideoInfo(string filePath) 
+    {
+        var tfile = TagLib.File.Create(filePath);
+       
+        string title = tfile.Tag.Title;
+        string minutes = tfile.Properties.Duration.TotalMinutes.ToString();
+        long fileSize = tfile.Length;
+        string fileSizeInGB = Math.Round((double)fileSize / (1024 * 1024 * 1024),2).ToString();
+        string resultInfoVideoFile = $"{title}\r\n{minutes} min.   {fileSizeInGB} Gb.";
+        return resultInfoVideoFile;
+    }
 }
 

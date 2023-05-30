@@ -1,6 +1,7 @@
 ﻿using IniParser;
 using IniParser.Model;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Http.Headers;
 using Telegram.Bot;
@@ -120,24 +121,17 @@ public abstract class BotTelegram
                                 var messageDounwFileTelegram = await botClient.SendTextMessageAsync(IdChats, $"Загрузка в телеграм займет примерно: {sizeFileInMb} мин.");
                                 idsendMes = messageDounwFileTelegram.MessageId;
 
-
-                                long bytesSent = 0L;
-                                double speed = 0.0;
-                                double sizeNowFile = 0.0;
-                                double allSizeFile = 0.0;
-                                double progress = 0.0;
-                                long bytesLeft = 0L;
-                                double timeLeft = 0.0;
-                                long fileLength = stream.Length;
+                                long bytesSent = 0L; double speed = 0.0; double sizeNowFile = 0.0; double allSizeFile = 0.0;
+                                double progress = 0.0; long bytesLeft = 0L; double timeLeft = 0.0; long fileLength = stream.Length;
                                 stopwatch.Start();
 
                                 using (var formData = new MultipartFormDataContent())
                                 {
                                     formData.Add(new StringContent(IdChats), "chat_id");
                                     formData.Add(content, "document");
-
                                     Timer timer = new Timer(state =>
                                     {
+
                                         bytesSent = stream.Position;
                                         double elapsedSecs = stopwatch.ElapsedMilliseconds / 1000.0;
                                         if (elapsedSecs != 0) speed = bytesSent / elapsedSecs / (1024 * 1024.0);
@@ -161,9 +155,6 @@ public abstract class BotTelegram
                                         Console.Write(inputInfoToSendTelegram);
                                         botClient.EditMessageTextAsync(IdChats, messageDounwFileTelegram.MessageId, inputInfoToSendTelegram);
                                     }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(timerInterval));
-
-
-
                                     var response = await httpClient.SendAsync(new HttpRequestMessage
                                     {
                                         Method = HttpMethod.Post,
@@ -175,26 +166,16 @@ public abstract class BotTelegram
                                     stopwatch.Stop();
                                     bytesSent = stream.Length;
 
-                                    var result = await response.Content.ReadAsStringAsync();
-                                    Console.WriteLine(result);
+                                    // var result = await response.Content.ReadAsStringAsync();
+                                    // Console.WriteLine(result);
+
+                                    await botClient.DeleteMessageAsync(IdChats, idsendMes);
+                                    Console.WriteLine("Файл загружен в телеграм сервер");
+                                    System.IO.File.Delete(PathDownFile);
+                                    PathDownFile = "";
+                                    DownfileIfo = "";
+                                    return;
                                 }
-
-                                // var sendTask = await botClient.SendDocumentAsync(IdChats, file);
-
-
-
-
-
-
-
-
-
-                                await botClient.DeleteMessageAsync(IdChats, idsendMes);
-                                Console.WriteLine("Файл загружен в телеграм сервер");
-                                System.IO.File.Delete(PathDownFile);
-                                PathDownFile = "";
-                                DownfileIfo = "";
-                                return;
                             }
                         }
                         catch (Exception e)
