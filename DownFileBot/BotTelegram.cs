@@ -81,12 +81,12 @@ public abstract class BotTelegram
                     await Task.WhenAll(t1, t2); // Выполняем задачи параллельно и ждем результат их завершения
                     async Task SendTextMessageInLoopAsync()
                     {
-                        await Task.Delay(1000);
-                        while (!t1.IsCompleted&&DownfileIfo!="") // Цикл будет выполняться, пока задача t1 не завершится
+                        await Task.Delay(TimeSpan.FromSeconds(3)); // Задержка на  секунду
+                        while (!t1.IsCompleted) // Цикл будет выполняться, пока задача t1 не завершится
                         {
-                            await Task.Delay(TimeSpan.FromSeconds(2)); // Задержка на  секунду
+                           
                             await botClient.EditMessageTextAsync(IdChats, messageDownFile.MessageId, DownfileIfo); // Отправляем текстовое сообщение
-
+                            await Task.Delay(TimeSpan.FromSeconds(2)); // Задержка на  секунду
                         }
                     }
                     PathDownFile = t1.Result;
@@ -99,10 +99,11 @@ public abstract class BotTelegram
                         InputOnlineFile file = new InputOnlineFile(stream, PathDownFile);
                         var sizeFileInBytes = new FileInfo(PathDownFile).Length;
                         var sizeFileInMb = Math.Round(((double)sizeFileInBytes / 1048576) / 9 / 60, 1);
+                        Console.WriteLine(sizeFileInMb);
                         var messageDounwFileTelegram = await botClient.SendTextMessageAsync(IdChats, $"Зазрузка в телеграм,займет примерно: {sizeFileInMb}  мин. ");
 
-                       var sendTask = Task.Run(async () => await botClient.SendDocumentAsync(IdChats, file));
-                        
+                        //var sendTask = Task.Run(async () => await botClient.SendDocumentAsync(IdChats, file));
+                        await botClient.SendDocumentAsync(IdChats, file);
                         await botClient.DeleteMessageAsync(IdChats, messageDounwFileTelegram.MessageId);
                         Console.WriteLine("Файл загружен в телеграм сервер");
                         System.IO.File.Delete(PathDownFile);
