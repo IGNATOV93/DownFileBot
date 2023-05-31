@@ -3,6 +3,7 @@ using IniParser.Model;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Net.Http.Handlers;
 using System.Net.Http.Headers;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -103,7 +104,8 @@ public abstract class BotTelegram
                             const int timerInterval = 1000; // интервал вывода скорости отправки файла, мс
                             var stopwatch = new Stopwatch();
                             var httpClient = new HttpClient();
-
+                            
+                           
                             using (var stream = new FileStream(PathDownFile, FileMode.Open))
                             {
                                 var content = new StreamContent(stream, bufferSize);
@@ -131,7 +133,7 @@ public abstract class BotTelegram
                                     formData.Add(content, "document");
                                     Timer timer = new Timer(state =>
                                     {
-
+                                       
                                         bytesSent = stream.Position;
                                         double elapsedSecs = stopwatch.ElapsedMilliseconds / 1000.0;
                                         if (elapsedSecs != 0) speed = bytesSent / elapsedSecs / (1024 * 1024.0);
@@ -152,9 +154,10 @@ public abstract class BotTelegram
                                         {
                                             inputInfoToSendTelegram = $"\rЗагрузка в телеграм: осталось несколько секунд..";
                                         }
-                                        Console.Write(inputInfoToSendTelegram);
+                                       // Console.Write(inputInfoToSendTelegram);
                                         botClient.EditMessageTextAsync(IdChats, messageDounwFileTelegram.MessageId, inputInfoToSendTelegram);
                                     }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(timerInterval));
+                                    
                                     var response = await httpClient.SendAsync(new HttpRequestMessage
                                     {
                                         Method = HttpMethod.Post,
