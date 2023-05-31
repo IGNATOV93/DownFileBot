@@ -82,7 +82,7 @@ public abstract class BotTelegram
                     async Task SendTextMessageInLoopAsync()
                     {
                         await Task.Delay(1000);
-                        while (!t1.IsCompleted) // Цикл будет выполняться, пока задача t1 не завершится
+                        while (!t1.IsCompleted&&DownfileIfo!="") // Цикл будет выполняться, пока задача t1 не завершится
                         {
                             await Task.Delay(TimeSpan.FromSeconds(2)); // Задержка на  секунду
                             await botClient.EditMessageTextAsync(IdChats, messageDownFile.MessageId, DownfileIfo); // Отправляем текстовое сообщение
