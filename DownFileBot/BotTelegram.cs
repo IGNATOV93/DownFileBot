@@ -5,6 +5,10 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
+using System.IO;
+using System.Diagnostics;
+using System.Threading;
+
 
 public abstract class BotTelegram
 {
@@ -103,7 +107,12 @@ public abstract class BotTelegram
                         var messageDounwFileTelegram = await botClient.SendTextMessageAsync(IdChats, $"Зазрузка в телеграм,займет примерно: {sizeFileInMb}  мин. ");
 
                         //var sendTask = Task.Run(async () => await botClient.SendDocumentAsync(IdChats, file));
-                        await botClient.SendDocumentAsync(IdChats, file);
+
+                        
+                           
+
+
+                           await botClient.SendDocumentAsync(IdChats, file);
                         await botClient.DeleteMessageAsync(IdChats, messageDounwFileTelegram.MessageId);
                         Console.WriteLine("Файл загружен в телеграм сервер");
                         System.IO.File.Delete(PathDownFile);
