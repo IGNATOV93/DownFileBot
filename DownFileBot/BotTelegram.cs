@@ -149,7 +149,7 @@ public abstract class BotTelegram
 
                                         string timeLeftStr = (timeLeft.TotalSeconds < 60) ? $"{timeLeft.TotalSeconds:F0} sec." : $"{timeLeft.TotalMinutes:F0}:{timeLeft.Seconds:D2} min.";
 
-                                        string inputInfoToSendTelegram = $"\rЗагрузка в телеграм: {sizeNowFile}/{allSizeFile} MB \r({progress}%) \r{speed:F2} MB/s \rОсталось примерно: {timeLeftStr}.";
+                                        string inputInfoToSendTelegram = $"\rЗагрузка в телеграм: {sizeNowFile}/{allSizeFile} MB \r({progress}%) \r{speed:F2} MB/s \rОсталось : {timeLeftStr}.";
                                         if (progress >= 90.0)
                                         {
                                             inputInfoToSendTelegram = $"\rЗагрузка в телеграм: осталось несколько секунд..";
@@ -169,8 +169,8 @@ public abstract class BotTelegram
                                     stopwatch.Stop();
                                     bytesSent = stream.Length;
 
-                                    // var result = await response.Content.ReadAsStringAsync();
-                                    // Console.WriteLine(result);
+                                     var result = await response.Content.ReadAsStringAsync();
+                                     Console.WriteLine(result);
 
                                     await botClient.DeleteMessageAsync(IdChats, idsendMes);
                                     Console.WriteLine("Файл загружен в телеграм сервер");
