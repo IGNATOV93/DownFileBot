@@ -35,7 +35,7 @@ abstract public class Methods
                         int bytesRead;
                         long totalBytesRead = 0;
                         long totalBytes = response.Content.Headers.ContentLength ?? -1;
-                        if (totalBytes >= 2000000000) //проверка файла больше ли 2000мб
+                        if (totalBytes >= 2147483648) //проверка файла больше ли 2000мб
                         {
                             return "";
                         }
@@ -62,7 +62,8 @@ abstract public class Methods
                                 double megabytesDownloaded = totalBytesRead / (1024 * 1024);
                                 double megabytesRemaining = (totalBytes - totalBytesRead) / (1024 * 1024);
                                 double speed =Math.Round(megabytesDownloaded/stopwatch.Elapsed.TotalSeconds,1);
-                                BotTelegram.DownfileIfo = $"\rЗагрузка на vps:{megabytesDownloaded:F2} MB /{totalBytes / (1024 * 1024)} MB ({percentage}%) - осталось : {TimeSpan.FromSeconds(stopwatch.Elapsed.TotalSeconds / totalBytesRead * (totalBytes - totalBytesRead)):hh\\:mm\\:ss} : {speed} Mb/s ";
+                                BotTelegram.DownfileIfo = $"\rЗагрузка на vps:  {megabytesDownloaded:F2} MB /{totalBytes / (1024 * 1024)} MB\r\n ({percentage}%) \r\n осталось : {TimeSpan.FromSeconds(stopwatch.Elapsed.TotalSeconds / totalBytesRead * (totalBytes - totalBytesRead)):hh\\:mm\\:ss} сек. \r\n {speed} Mb/s ";
+                              
                                 Console.Write(BotTelegram.DownfileIfo);
 
                             }
