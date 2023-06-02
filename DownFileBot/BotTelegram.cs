@@ -1,11 +1,13 @@
 ﻿using IniParser;
 using IniParser.Model;
+using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Handlers;
 using System.Net.Http.Headers;
+using TagLib.Mpeg4;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -173,37 +175,13 @@ public abstract class BotTelegram
                                        // Console.Write(inputInfoToSendTelegram);
                                         botClient.EditMessageTextAsync(IdChats, messageDounwFileTelegram.MessageId, inputInfoToSendTelegram);
                                     }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(timerInterval));
-                                    if(Methods.FileToVideoIsValid(PathDownFile))
-                                    {
 
-                                        // Создаем объект HttpClient
-                                        var httpClient1 = new HttpClient();
-
-                                        // Создаем объект StreamContent для хранения данных запроса
-                                        var streamContent = new StreamContent(System.IO.File.OpenRead(PathDownFile));
-
-                                        // Создаем объект HttpRequestMessage для запроса sendVideo
-                                        var request = new HttpRequestMessage
-                                        {
-                                            Method = HttpMethod.Post,
-                                            RequestUri = new Uri($"{data["Profile0"]["YourLocalServerTelegram"]}/bot{data["Profile0"]["YourBotTelegreamToken"]}/sendVideo"),
-                                            Content = streamContent
-                                        };
-
-                                        // Отправляем запрос и получаем ответ
-                                        var response1 = await httpClient.SendAsync(request);
-                                    }
-                                    if (!Methods.FileToVideoIsValid(PathDownFile))
-                                    {
-
-                                    }
-                                        var response = await httpClient.SendAsync(new HttpRequestMessage
+                                    var response = await httpClient.SendAsync(new HttpRequestMessage
                                     {
                                         Method = HttpMethod.Post,
                                         RequestUri = new Uri($"{data["Profile0"]["YourLocalServerTelegram"]}/bot{data["Profile0"]["YourBotTelegreamToken"]}/sendDocument"),
                                         Content = formData
                                     });
-
                                     timer.Dispose();
                                     stopwatch.Stop();
                                    bytesSent = stream.Length;
