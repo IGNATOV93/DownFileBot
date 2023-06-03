@@ -67,12 +67,13 @@ public abstract class BotTelegram
                     async Task SendTextMessageInLoopAsync()
                     {
                         await Task.Delay(1000);
+                        string prevSendDownfileInfo = "/";
                         while (!t1.IsCompleted) // Цикл будет выполняться, пока задача t1 не завершится
                         {
                             await Task.Delay(TimeSpan.FromSeconds(1)); // Задержка на  секунду
-                            if (DownfileIfo == "") { continue; }
+                            if (DownfileIfo == ""||DownfileIfo==prevSendDownfileInfo) { continue; }
                             await botClient.EditMessageTextAsync(IdChats, messageDownFile.MessageId, DownfileIfo); // Отправляем текстовое сообщение
-
+                            prevSendDownfileInfo = DownfileIfo;
                         }
                     }
                     PathDownFile = t1.Result;
