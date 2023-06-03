@@ -10,7 +10,6 @@
   <ItemGroup>
     <PackageReference Include="ini-parser" Version="2.5.2" />
     <PackageReference Include="System.Net.Http.Formatting.Extension" Version="5.2.3" />
-    <PackageReference Include="TagLibSharp" Version="2.3.0" />
     <PackageReference Include="Telegram.Bot" Version="18.0.0" />
   </ItemGroup>
 
