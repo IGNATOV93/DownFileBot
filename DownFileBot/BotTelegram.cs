@@ -69,8 +69,8 @@ public abstract class BotTelegram
                         await Task.Delay(1000);
                         while (!t1.IsCompleted) // Цикл будет выполняться, пока задача t1 не завершится
                         {
-                            if (DownfileIfo == "") { continue; }
                             await Task.Delay(TimeSpan.FromSeconds(1)); // Задержка на  секунду
+                            if (DownfileIfo == "") { continue; }
                             await botClient.EditMessageTextAsync(IdChats, messageDownFile.MessageId, DownfileIfo); // Отправляем текстовое сообщение
 
                         }
