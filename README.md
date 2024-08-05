@@ -4,6 +4,7 @@
 В settings.ini  заполните своими данными 
 - YourBotTelegreamToken=ваш токен от телеграм бота
 - YourLocalServerTelegram=http://localhost:8082
+ 
  Запустите бота через screen
  ```sh
 screen -S downbot
@@ -110,3 +111,4 @@ ps aux | grep telegram-bot-api
 
 - Использование бота:
 Просто кидайте ему прямую ссылку для загрузки,он будет уведомлять ход загрузки и после отдаст файл с сервера телеграм.
+
