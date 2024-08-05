@@ -77,3 +77,11 @@ telegram-bot-api --api-id="ваш api id" --api-hash="ваш api hash" --local
 Проверьте снова:
 ps aux | grep telegram-bot-api
 В выводе должна появиться строка с вашими api_id и api_hash, что указывает на успешный запуск сервера с вашими данными.
+
+Сама установка бота скачайте архив и паспакуйте папку в нем с ботом .
+Файл settings.ini Два поля заполните своими данными 
+YourBotTelegreamToken=
+YourLocalServerTelegram=http://localhost:8082
+После проделанного выше ,сможете его запусить через screen .
+Пример запуска cd /opt/downBot/
+./DownFileBot .
