@@ -6,9 +6,9 @@
 - YourLocalServerTelegram=http://localhost:8082
  
  Запустите бота через screen
- ```sh
+```sh
 screen -S downbot
-cd /opt/downBot/./DownFileBot
+cd /opt/downBot/./DownFileBot ```sh
 ## Предварительные требования:
 - linux 
 - dotnet 6
@@ -22,18 +22,18 @@ cd /opt/downBot/./DownFileBot
 ```sh
 wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
 sudo dpkg -i packages-microsoft-prod.deb
-
+```sh
 Обновите пакеты и установите .NET SDK:
 ```sh
 sudo apt-get update
 sudo apt-get install -y apt-transport-https
 sudo apt-get update
 sudo apt-get install -y dotnet-sdk-6.0
-
+```sh
 Проверьте установку:
 ```sh
 dotnet --version
-
+```sh
 - Установка screen 
 ```sh
 sudo apt-get install screen
@@ -41,7 +41,7 @@ sudo apt-get install screen
  Запуск окна Screen:
   ```sh
   screen
-
+```sh
 Нажмите два раза Enter, чтобы открыть окно Screen, в котором можно запускать бота или другой софт.
 
 Свернуть окно и продолжить работу бота:
@@ -50,10 +50,10 @@ Ctrl + A + D
 Просмотр запущенных окон Screen:
 ```sh
 screen -r
-
+```sh
 Открытие нужного окна:
 ```sh
-screen -r 1137
+screen -r 1137 ```sh
 Где 1137 - это идентификатор запущенного окна, который можно увидеть в выводе команды screen -r.
 
 - Установка локального сервера Telegram на Ubuntu 20-22
@@ -62,29 +62,29 @@ screen -r 1137
 ```sh
 apt-get update
 apt-get upgrade
-
+```sh
 Установите необходимые зависимости:
 ```sh
 apt-get install make git zlib1g-dev libssl-dev gperf cmake g++
-
+```sh
 Клонируйте репозиторий Telegram Bot API:
 ```sh
 git clone --recursive https://github.com/tdlib/telegram-bot-api.git
 cd telegram-bot-api
-
+```sh
 Создайте и перейдите в директорию сборки:
 ```sh
 rm -rf build
 mkdir build
 cd build
-
+```sh
 Скомпилируйте и установите:
 ```sh
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
 cmake --build . --target install
 cd ../..
 ls -l /usr/local/bin/telegram-bot-api*
-
+```sh
 Примечание: Команда cmake --build . --target install может занять несколько часов. Рекомендуется запускать её на ночь.
 Регистрация приложения в Telegram
 Следуйте инструкции для получения api_id и api_hash, которые понадобятся для запуска сервера.
